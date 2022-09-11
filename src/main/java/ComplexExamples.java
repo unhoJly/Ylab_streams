@@ -35,7 +35,7 @@ public class ComplexExamples {
         }
     }
 
-    private static Person[] RAW_DATA = new Person[]{
+    private static final Person[] RAW_DATA = new Person[]{
             new Person(0, "Harry"),
             new Person(0, "Harry"), // дубликат
             new Person(1, "Harry"), // тёзка
@@ -100,8 +100,8 @@ public class ComplexExamples {
         /*
         Task1
             Убрать дубликаты, отсортировать по идентификатору, сгруппировать по имени
-
-            Что должно получиться Key: Amelia
+            Что должно получиться
+                Key: Amelia
                 Value:4
                 Key: Emily
                 Value:1
@@ -111,7 +111,16 @@ public class ComplexExamples {
                 Value:1
          */
 
+        Map<String, List<Person>> map = Arrays.stream(RAW_DATA)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted(Comparator.comparing(Person::getName))
+                .sorted(Comparator.comparing(Person::getId))
+                .collect(groupingBy(Person::getName));
 
+        map.forEach((key, value) -> System.out.println("Key: " + key + "\nValue:" + value.size()));
+
+        System.out.println();
 
         /*
         Task2
@@ -119,12 +128,13 @@ public class ComplexExamples {
             [3, 4, 2, 7], 10 -> [3, 7] - вывести пару менно в скобках, которые дают сумму - 10
          */
 
+        printPairs(new int[]{3, 4, 2, 7}, 10);
 
+        System.out.println();
 
         /*
         Task3
             Реализовать функцию нечеткого поиска
-            
                     fuzzySearch("car", "ca6$$#_rtwheel"); // true
                     fuzzySearch("cwhl", "cartwheel"); // true
                     fuzzySearch("cwhee", "cartwheel"); // true
@@ -132,7 +142,58 @@ public class ComplexExamples {
                     fuzzySearch("cwheeel", "cartwheel"); // false
                     fuzzySearch("lw", "cartwheel"); // false
          */
+    }
+
+    private static void printPairs (int[] array, int sum) {
+        if (array == null) {
+            System.out.println("Input array not exists");
+            return;
+        }
+
+        int firstNumber = 0;
+        int secondNumber = array.length - 1;
+
+        Arrays.sort(array);
+
+        while (firstNumber < secondNumber) {
+            int tempSum = array[firstNumber] + array[secondNumber];
+            if (tempSum == sum) {
+                System.out.println("[" + array[firstNumber] + ", " + array[secondNumber] + "]");
+                firstNumber++;
+                secondNumber--;
+            } else {
+                if (tempSum < sum) {
+                    firstNumber++;
+                } else {
+                    secondNumber--;
+                }
+            }
+        }
+    }
+
+    static boolean fuzzySearch (String pattern, String text) {
+        if (text == null || pattern == null
+                || text.length() < pattern.length()) {
+            return false;
+        } else if (pattern.equals(text)) {
+            return true;
+        }
+
+        int currentPatternPosition = 0;
+        char currentPatternCharacter = pattern.charAt(currentPatternPosition);
+        int charsCounter = 0;
 
 
+        for (int i = 0; i < text.length(); i++) {
+            if (currentPatternCharacter == text.charAt(i)) {
+                charsCounter++;
+                if (charsCounter == pattern.length()) {
+                    return true;
+                }
+                currentPatternCharacter = pattern.charAt(++currentPatternPosition);
+            }
+        }
+
+        return false;
     }
 }
